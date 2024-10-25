@@ -8,5 +8,8 @@
   },
   "author": "",
   "license": "ISC",
-  "description": "Node.js Contact Manager App"
+  "description": "Node.js Contact Manager App",
+  "dependencies": {
+    "express": "^4.21.1"
+  }
 }
