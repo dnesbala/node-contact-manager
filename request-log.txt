@@ -1,0 +1,3 @@
+10/25/2024, 8:19:44 PM: GET /api/contacts/
+10/25/2024, 8:19:53 PM: GET /api/contacts/
+10/25/2024, 8:19:57 PM: GET /api/contacts/2
