@@ -5,6 +5,8 @@ const contacts = require("./contacts.json");
 const app = express();
 const PORT = 8000;
 
+const contactsPath = "./contacts.json";
+
 app.use(express.json());
 
 app.get("/api/contacts", (req, res) => {
@@ -35,13 +37,62 @@ app.post("/api/contacts", (req, res) => {
 
   const contact = { id: contacts.length + 1, ...req.body };
   contacts.push(contact);
-  fs.writeFile("./contacts.json", JSON.stringify(contacts), (err) => {
+  fs.writeFile(contactsPath, JSON.stringify(contacts), (err) => {
     if (err) {
       console.log("Error writing contact to file");
     } else {
       return res.status(201).json({
         message: "Contact created successfully",
         contact_id: contacts.length,
+      });
+    }
+  });
+});
+
+app.patch("/api/contacts/:id", (req, res) => {
+  const id = Number(req.params.id);
+  const indexOfContactToUpdate = contacts.findIndex(
+    (contact) => contact.id === id
+  );
+  if (indexOfContactToUpdate === -1) {
+    return res.status(404).json({
+      error: "Contact Not Found",
+      contact_id: id,
+    });
+  }
+
+  contacts[indexOfContactToUpdate] = {
+    ...contacts[indexOfContactToUpdate],
+    ...req.body,
+  };
+  fs.writeFile(contactsPath, JSON.stringify(contacts), (err) => {
+    if (!err) {
+      return res.json({
+        message: "Contact updated successfully",
+      });
+    }
+  });
+});
+
+app.delete("/api/contacts/:id", (req, res) => {
+  const id = Number(req.params.id);
+
+  const contactToDelete = contacts.find((contact) => contact.id === id);
+  if (!contactToDelete) {
+    return res.status(404).json({
+      message: "Contact Not Found",
+    });
+  }
+
+  const filteredContacts = contacts.filter(
+    (contact) => contact.id !== contactToDelete.id
+  );
+  console.log(filteredContacts);
+  fs.writeFile(contactsPath, JSON.stringify(filteredContacts), (err) => {
+    if (!err) {
+      return res.json({
+        message: "Contact deleted succesfully",
+        contact_id: id,
       });
     }
   });
