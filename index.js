@@ -5,8 +5,6 @@ const contacts = require("./contacts.json");
 const app = express();
 const PORT = 8000;
 
-const contactsPath = "./contacts.json";
-
 app.use(express.json());
 
 app.get("/api/contacts", (req, res) => {
@@ -37,15 +35,10 @@ app.post("/api/contacts", (req, res) => {
 
   const contact = { id: contacts.length + 1, ...req.body };
   contacts.push(contact);
-  fs.writeFile(contactsPath, JSON.stringify(contacts), (err) => {
-    if (err) {
-      console.log("Error writing contact to file");
-    } else {
-      return res.status(201).json({
-        message: "Contact created successfully",
-        contact_id: contacts.length,
-      });
-    }
+  writeToContactFile(res, {
+    statusCode: 201,
+    message: "Contact created successfully",
+    contactId: contacts.length,
   });
 });
 
@@ -65,12 +58,9 @@ app.patch("/api/contacts/:id", (req, res) => {
     ...contacts[indexOfContactToUpdate],
     ...req.body,
   };
-  fs.writeFile(contactsPath, JSON.stringify(contacts), (err) => {
-    if (!err) {
-      return res.json({
-        message: "Contact updated successfully",
-      });
-    }
+  writeToContactFile(res, {
+    message: "Contact updated successfully",
+    contactId: id,
   });
 });
 
@@ -87,15 +77,23 @@ app.delete("/api/contacts/:id", (req, res) => {
   const filteredContacts = contacts.filter(
     (contact) => contact.id !== contactToDelete.id
   );
-  console.log(filteredContacts);
-  fs.writeFile(contactsPath, JSON.stringify(filteredContacts), (err) => {
-    if (!err) {
-      return res.json({
-        message: "Contact deleted succesfully",
-        contact_id: id,
+  writeToContactFile(res, {
+    message: "Contact deleted successfully",
+    contactId: id,
+  });
+});
+
+function writeToContactFile(res, { statusCode = 200, contactId, message }) {
+  fs.writeFile("./contacts.json", JSON.stringify(contacts), (err) => {
+    if (err) {
+      console.log("Error writing contact to file");
+    } else {
+      return res.status(statusCode).json({
+        message: message,
+        contact_id: contactId,
       });
     }
   });
-});
+}
 
 app.listen(PORT, () => console.log(`Server listening to port ${PORT}`));
